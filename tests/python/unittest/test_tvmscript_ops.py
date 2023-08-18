@@ -254,6 +254,6 @@ def test_slice_op():
 
 
 if __name__ == "__main__":
-    test_get_valid_counts_script_func()
-    test_alloc_zero_dim_buffer_round_trip()
+    # test_get_valid_counts_script_func()
+    # test_alloc_zero_dim_buffer_round_trip()
     test_slice_op()

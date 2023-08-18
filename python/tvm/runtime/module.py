@@ -117,6 +117,7 @@ class Module(object):
 
     @property
     def entry_func(self):
+        __import__('pdb').set_trace()
         """Get the entry function
 
         Returns
@@ -126,7 +127,12 @@ class Module(object):
         """
         if self._entry:
             return self._entry
+        # 6clc: (Pdb) p self.entry_name
+        # '__tvm_main__'
+
         self._entry = self.get_function(self.entry_name)
+        # 6clc : (Pdb) p self._entry
+        # <tvm.runtime.packed_func.PackedFunc object at 0x7f9e444ff900>
         return self._entry
 
     def implements_function(self, name, query_imports=False):
@@ -196,6 +202,7 @@ class Module(object):
         return self.handle.value == other.handle.value
 
     def __call__(self, *args):
+        __import__('pdb').set_trace()
         if self._entry:
             return self._entry(*args)
         # pylint: disable=not-callable

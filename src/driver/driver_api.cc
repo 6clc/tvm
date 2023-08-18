@@ -507,7 +507,9 @@ runtime::Module TIRToRuntime(const Map<Target, IRModule>& inputs_arg,
 
 TVM_REGISTER_GLOBAL("driver.tir_to_runtime")
     .set_body_typed([](const Map<Target, IRModule>& inputs_arg, Target host_target) {
-      return TIRToRuntime(inputs_arg, host_target);
+      auto x = TIRToRuntime(inputs_arg, host_target);
+      VLOG(2) << x;
+      return x;
     });
 
 // Build for heterogeneous execution when targets are specified as

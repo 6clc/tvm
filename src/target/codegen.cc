@@ -55,6 +55,9 @@ runtime::Module Build(IRModule mod, Target target) {
   std::string build_f_name = "target.build." + target->kind->name;
   const PackedFunc* bf = runtime::Registry::Get(build_f_name);
   ICHECK(bf != nullptr) << build_f_name << " is not enabled";
+  VLOG(2) << "xxx " << build_f_name;
+  // -> target/llvm/llvm_module.cc:447
+  // -> src/target/opt/build_cuda_on.cc 
   return (*bf)(mod, target);
 }
 

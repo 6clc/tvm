@@ -511,7 +511,9 @@ class CrossThreadReductionTransformer : public StmtMutator {
 
     // Step 2. Collect all the vars that appear in the bindings of reduction block iters.
     std::unordered_set<const VarNode*> reduction_vars;
+    VLOG(2) << "hahha";
     GetVarsTouchedByBlockIters(GetRef<BlockRealize>(realize), nullptr, &reduction_vars);
+    for(auto tmp:reduction_vars) VLOG(2) << "hahah " << tmp->name_hint;
 
     // Step 3. Collect the loops whose loop vars appear in the bindings of reduction block iters.
     // We call these loops "reduction-related".
@@ -521,6 +523,7 @@ class CrossThreadReductionTransformer : public StmtMutator {
     bool need = false;
     std::vector<const ForNode*> reduction_loops;
     for (const ForNode* loop : loop_stack_) {
+      VLOG(2) << loop->loop_var->name_hint;
       if (reduction_vars.count(loop->loop_var.get())) {
         // Step 3. Collect the loop.
         reduction_loops.push_back(loop);
@@ -685,6 +688,7 @@ class CrossThreadReductionTransformer : public StmtMutator {
 
   Stmt VisitStmt(const Stmt& stmt) final {
     statement_stack_.push_back(stmt.get());
+    VLOG(2) << "xxx"  << stmt;
     Stmt result = StmtMutator::VisitStmt(stmt);
     statement_stack_.pop_back();
     return result;
@@ -728,6 +732,8 @@ class CrossThreadReductionTransformer : public StmtMutator {
     // Replace `result` with the pre-stored result if `loop` appears as a key in `loop2new_stmt_`.
     auto it = loop2new_stmt_.find(loop);
     if (it != loop2new_stmt_.end()) {
+      VLOG(2) << loop;
+      VLOG(2) << it -> second;
       return it->second;
     } else {
       return result;
@@ -758,7 +764,9 @@ class CrossThreadReductionTransformer : public StmtMutator {
 
   void MakeCrossThreadReduction(const BlockRealizeNode* realize,
                                 const std::vector<const ForNode*> reduction_loops) {
+    VLOG(2) << "MakeCrossThreadReduction";
     const BlockNode* block = realize->block.get();
+    VLOG(2) << block->body;
 
     // Step 1. Check whether cross-thread reduction can be applied. If no, throw an exception on
     // which condition the block violates.
@@ -775,6 +783,7 @@ class CrossThreadReductionTransformer : public StmtMutator {
     bool need_in_thread_reduction =
         n_bound_reduction_loops < static_cast<int>(reduction_loops.size()) ||
         !is_one(realize->predicate);
+    VLOG(2) << "need in thread reduce " << need_in_thread_reduction;
     // Step 3. Create intermediate buffers, storing them in `ct_buffers` and
     // `it_buffers`. Let the scope block allocate these new buffers.
     Array<Buffer>& new_buffers = block2new_buffers_[block_stack_.back()];
@@ -849,7 +858,10 @@ class CrossThreadReductionTransformer : public StmtMutator {
       // Return an empty statement, because the transformation result will
       // be inserted when returning to the first reduction-related loop.
       has_cross_thread_reduction_ = true;
+      VLOG(2) << realize->block.get()->body;
       MakeCrossThreadReduction(realize, reduction_loops);
+      VLOG(2) << "over make cross reduce";
+      VLOG(2) << realize->block.get()->body;
       return Stmt{nullptr};
     }
 
@@ -885,10 +897,13 @@ class CrossThreadReductionTransformer : public StmtMutator {
 };
 
 PrimFunc LowerCrossThreadReduction(PrimFunc f) {
+  VLOG(2) << "haha";
   // Only apply this pass to TIR that is not from TE schedules
   if (!IsFromLegacyTESchedule(f)) {
     PrimFuncNode* fptr = f.CopyOnWrite();
+    VLOG(2) << "start make cross reduce" << f;
     fptr->body = CrossThreadReductionTransformer()(f->body);
+    VLOG(2) << "over make cross reduce" << f;
     return f;
   } else {
     return f;

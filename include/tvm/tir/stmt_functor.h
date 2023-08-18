@@ -185,6 +185,7 @@ class TVM_DLL StmtMutator : protected StmtFunctor<Stmt(const Stmt&)> {
    *       do mutator(std::move(stmt)) or when copy elison is triggered.
    */
   Stmt operator()(Stmt stmt) {
+    VLOG(2) << stmt;
     allow_copy_on_write_ = true;
     return VisitStmt(stmt);
   }

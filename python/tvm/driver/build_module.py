@@ -256,7 +256,13 @@ def build(
             raise ValueError("The key of inputs must be str or " "Target when inputs is dict.")
         if not isinstance(mod, tvm.IRModule):
             raise ValueError("inputs must be Schedule, IRModule," "or dict of str to IRModule.")
+        #(6clc): mod = runtime = TIR;
+        # 非常重要，tir类型转换成
         annotated_mods[tar] = mod.with_attr("runtime", runtime)
+        # (Pdb) p type(annotated_mods['cuda'])
+        #       <class 'tvm.ir.module.IRModule'>
+
+        print("xyxy ", annotated_mods)
 
     # TODO(mbs): Both CompilationConfig and TIRToRuntime implement the same host target
     #  defaulting logic, but there's currently no way to get back the decided host.
@@ -276,16 +282,32 @@ def build(
     if not target_host:
         target_host = "llvm" if tvm.runtime.enabled("llvm") else "stackvm"
 
+    # 6clc: target_host = "llvm"
     annotated_mods, target_host = Target.canon_target_map_and_host(annotated_mods, target_host)
 
-    rt_mod_host = _driver_ffi.tir_to_runtime(annotated_mods, target_host)
+    # 6clc: annotated_mods 有TIR + 一些cuda编译的信息
+    print("yyyyy " )
+    for k,v in annotated_mods.items():
+        print(type(k), type(v))
+        # <class 'tvm.target.target.Target'> <class 'tvm.ir.module.IRModule'>
+#     (Pdb) p annotated_mods.keys()
+# dict_keys([cuda -keys=cuda,gpu -arch=sm_70 -max_num_threads=1024 -thread_warp_size=32])
 
+    rt_mod_host = _driver_ffi.tir_to_runtime(annotated_mods, target_host)
+    # -> tvm/python/tvm/_ffi/_ctypes/packed_func.py(217)__call__()
+ 
+    # 6clc: 
+    # (Pdb) p rt_mod_host
+    # Module(llvm, 2dcb108)
+
+    # 6clc: 不知道在干什么, 打印annotated_mods也没发现和之前不一样的地方
     annotated_mods, target_host = Target.canon_target_map_and_host(annotated_mods, target_host)
 
     if not isinstance(target_host, Target):
         target_host = Target(target_host)
 
     if str(runtime) == "crt" and runtime["system-lib"]:
+        # 6clc: SKIP
         if target_host.kind.name == "c":
             create_csource_crt_metadata_module = tvm._ffi.get_global_func(
                 "runtime.CreateCSourceCrtMetadataModule"
@@ -297,8 +319,16 @@ def build(
             )
             to_return = create_llvm_crt_metadata_module([rt_mod_host], target_host, runtime)
     else:
+        # 6clc: hint
+        print("xxxxx ")
         to_return = rt_mod_host
 
+    # (6clc) to_return 里有 TIR 和 host module等信息
+    # (Pdb) p to_return.handle
+    #       c_void_p(48017672)
+    # 后续的call func也是这个handle
+    print("6clc ", to_return, " " , to_return.handle)
+    print(type(to_return))
     return OperatorModule.from_module(to_return, ir_module_by_target=annotated_mods, name=name)
 
 
