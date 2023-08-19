@@ -168,6 +168,8 @@ Array<tvm::transform::Pass> CreatePassList(bool disable_loop_partition) {
 
   // phase passes is of the form
   // [[phase_number, pass], [phase_number, pass]... ]
+  //  gdb(6clc): is zero
+  VLOG(2) << "6clc lower pass size: " << add_lower_pass.size();
   for (Array<ObjectRef> phase_pass : add_lower_pass) {
     const IntImmNode* phase_num = phase_pass[0].as<IntImmNode>();
     ICHECK(phase_num)
@@ -359,6 +361,7 @@ IRModule LowerPrimFunc(tir::PrimFunc func, const std::string& name, bool simple_
 
   // Get the pass list
   Array<transform::Pass> pass_list = CreatePassList(simple_mode);
+  VLOG(2) << "6clc cpp " << pass_list.size(); 
   return LowerWithPassList(std::move(mod), pass_list);
 }
 

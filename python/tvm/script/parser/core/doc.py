@@ -183,6 +183,7 @@ def to_doc(node):
         return tuple(to_doc(n) for n in node)
     if isinstance(node, list):
         return [to_doc(n) for n in node]
+    print("6clc ", node.__class__.__name__)
     func = _get_registry_entry(node.__class__.__name__, "to_doc")
     if not func:
         raise NotImplementedError(f"to_doc is not implemented for: {node.__class__.__name__}")
@@ -229,6 +230,7 @@ def parse(
             filename=filename,
             mode=mode,
         )
+    print(source, "6clc source code")
     return to_doc(program)
 
 
@@ -249,11 +251,22 @@ class NodeVisitor:
         )(node)
 
     def generic_visit(self, node: doc.AST) -> None:
+#         (Pdb) p node.__class__._FIELDS
+# ['body', 'lineno', 'col_offset', 'end_lineno', 'end_col_offset']
+
         for field in node.__class__._FIELDS:  # pylint: disable=protected-access
             value = getattr(node, field, None)
+# (Pdb) p value (body)
+# [<tvm.script.parser.core.doc_core.FunctionDef object at 0x7fa544219d00>]
             if value is None:
                 pass
             elif isinstance(value, (doc.AST, list, tuple)):
+#                 (Pdb) p type(value)
+# <class 'list'>
+# (Pdb) p value
+# [<tvm.script.parser.core.doc_core.FunctionDef object at 0x7fa544219d00>]
+# (Pdb) p len(value)
+# 1
                 self.visit(value)
 
 

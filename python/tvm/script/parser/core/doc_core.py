@@ -91,6 +91,7 @@ class FunctionDef(stmt):
         end_lineno,
         end_col_offset,
     ):
+        __import__('pdb').set_trace()
         super().__init__(lineno, col_offset, end_lineno, end_col_offset)
         self.name = name
         self.args = args

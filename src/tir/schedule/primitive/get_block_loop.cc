@@ -48,6 +48,7 @@ Array<StmtSRef> GetBlocks(const ScheduleState& self, const String& name, const G
 }
 
 Array<StmtSRef> GetLoops(const StmtSRef& block_sref) {
+  // 递归遍历该Block上面有多少个For Node
   std::vector<StmtSRef> result;
   for (StmtSRefNode* parent = block_sref->parent; parent && parent->stmt->IsInstance<ForNode>();
        parent = parent->parent) {

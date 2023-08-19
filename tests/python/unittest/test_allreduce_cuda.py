@@ -33,17 +33,17 @@ def reduce(a: T.handle, b: T.handle, d1: T.int32, d2: T.int32, d3: T.int32) -> N
             B[vi, vj, vk] = B[vi, vj, vk] + A[vi, vj, vk, vl]
 
 
-@T.prim_func
-def reduce_max(a: T.handle, b: T.handle, d1: T.int32, d2: T.int32, d3: T.int32) -> None:
-    A = T.match_buffer(a, [1, d1, d2, d3])
-    B = T.match_buffer(b, [1, d1, d2])
-
-    for i, j, k, l in T.grid(1, d1, d2, d3):
-        with T.block("reduce"):
-            vi, vj, vk, vl = T.axis.remap("SSSR", [i, j, k, l])
-            with T.init():
-                B[vi, vj, vk] = T.float32(-3.4028234663852886e38)
-            B[vi, vj, vk] = T.max(B[vi, vj, vk], A[vi, vj, vk, vl])
+# @T.prim_func
+# def reduce_max(a: T.handle, b: T.handle, d1: T.int32, d2: T.int32, d3: T.int32) -> None:
+#     A = T.match_buffer(a, [1, d1, d2, d3])
+#     B = T.match_buffer(b, [1, d1, d2])
+#
+#     for i, j, k, l in T.grid(1, d1, d2, d3):
+#         with T.block("reduce"):
+#             vi, vj, vk, vl = T.axis.remap("SSSR", [i, j, k, l])
+#             with T.init():
+#                 B[vi, vj, vk] = T.float32(-3.4028234663852886e38)
+#             B[vi, vj, vk] = T.max(B[vi, vj, vk], A[vi, vj, vk, vl])
 
 
 @tvm.testing.requires_gpu
@@ -55,13 +55,21 @@ def test_allreduce_cuda():
         _, _, _d1, _d2, _d3 = reduce.params
         mod = reduce.specialize({_d1: d1, _d2: d2, _d3: d3})
         print(mod)
+        # pdb(6clc): 初始化tracedSchedule
         sch = tvm.tir.Schedule(mod)
         blk = sch.get_block("reduce")
         i, j, k, l = sch.get_loops(blk)
+        # pdb(6clc): 原有的mod并不会改变，改变的只有sch.mod["main"]
+        #     for i in T.thread_binding(1, thread="blockIdx.x"):
+        #           for j in T.thread_binding(0, thread="threadIdx.z"):
+        #               for k, l in T.grid(0, 32):
+
         sch.bind(i, "blockIdx.x")
         sch.bind(j, "threadIdx.z")
         sch.bind(k, "threadIdx.y")
         sch.bind(l, "threadIdx.x")
+        print("hahahahahahahaha")
+        print(sch.mod["main"])
         f = tvm.build(sch.mod["main"], target="cuda")
 
         # prepare input and output array

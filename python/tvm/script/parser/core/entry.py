@@ -62,14 +62,21 @@ def parse(program: Union[doc.AST, Any, str], extra_vars: Dict[str, Any] = None) 
         extra_vars = _default_globals()
 
     ann = {}
+#     (Pdb) p type(program)
+# <class 'function'>
     if inspect.isfunction(program):
+#         (Pdb) p program.__annotations__
+# {'a': <function handle at 0x7f0604257040>, 'b': <function handle at 0x7f0604257040>, 'd1': <function func_gen.<locals>.func at 0x7f0604248790>, 'd2': <function func_gen.<locals>.func at 0x7f0604248790>, 'd3': <function func_gen.<locals>.func at 0x7f0604248790>, 'return': None}
+
         ann = {program.__name__: program.__annotations__}
     elif inspect.isclass(program):
         for name, func in program.__dict__.items():
             if inspect.isfunction(func):
                 ann[name] = func.__annotations__
 
-    source = Source(program)
+    source = Source(program)# 封装源码在source中
+#     (Pdb) p ann
+# {'reduce': {'a': <function handle at 0x7f0604257040>, 'b': <function handle at 0x7f0604257040>, 'd1': <function func_gen.<locals>.func at 0x7f0604248790>, 'd2': <function func_gen.<locals>.func at 0x7f0604248790>, 'd3': <function func_gen.<locals>.func at 0x7f0604248790>, 'return': None}}
     parser = Parser(source, ann)
     with IRBuilder() as builder:
         try:

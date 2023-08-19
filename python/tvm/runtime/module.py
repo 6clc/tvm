@@ -117,7 +117,6 @@ class Module(object):
 
     @property
     def entry_func(self):
-        __import__('pdb').set_trace()
         """Get the entry function
 
         Returns
@@ -202,7 +201,6 @@ class Module(object):
         return self.handle.value == other.handle.value
 
     def __call__(self, *args):
-        __import__('pdb').set_trace()
         if self._entry:
             return self._entry(*args)
         # pylint: disable=not-callable

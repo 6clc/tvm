@@ -166,6 +166,7 @@ class Schedule(Object):
         2) VerifyCachedFlags
         """
         # call the constructor
+        # pdb(6clc): python/tvm/_ffi/_ctypes/object.py
         self.__init_handle_by_constructor__(
             _ffi_api.TracedSchedule,  # type: ignore # pylint: disable=no-member
             _parse_mod(mod),

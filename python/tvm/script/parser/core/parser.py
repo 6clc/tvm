@@ -305,6 +305,8 @@ class VarTable:
 def _dispatch_wrapper(func: dispatch.ParseMethod) -> dispatch.ParseMethod:
     def _wrapper(self: "Parser", node: doc.AST) -> None:
         try:
+            # 通过wrapper进入tir的parser方法script/parser/tir/parser.py(366)visit_function_def()
+
             return func(self, node)
         except DiagnosticError:
             raise
@@ -349,7 +351,7 @@ class Parser(doc.NodeVisitor):
         source: Source,
         function_annotations: Dict[str, Dict[str, Any]],
     ) -> None:
-        self.diag = Diagnostics(source)
+        self.diag = Diagnostics(source) # 报错系统
         self.dispatch_tokens = ["default"]
         self.function_annotations = function_annotations
         self.var_table = VarTable()
@@ -369,18 +371,26 @@ class Parser(doc.NodeVisitor):
         """
         if extra_vars is None:
             extra_vars = {}
+        # 局部变量表
         with self.var_table.with_frame():
+            # (Pdb) p extra_vars.keys()
+            # dict_keys(['__name__', '__doc__', '__package__', '__loader__', '__spec__', '__file__', '__cached__', '__builtins__', '@py_builtins', '@pytest_ar', 'tvm', 'np', 'T'])
+            # (Pdb) p extra_vars.values()
+# dict_values(['test_allreduce_cuda', None, '', <_pytest.assertion.rewrite.AssertionRewritingHook object at 0x7f06ed97f3a0>, ModuleSpec(name='test_allreduce_cuda', loader=<_pytest.assertion.rewrite.AssertionRewritingHook object at 0x7f06ed97f3a0>, origin='/prs/tvm/tests/python/unittest/test_allreduce_cuda.py'), '/prs/tvm/tests/python/unittest/test_allreduce_cuda.py', '/prs/tvm/tests/python/unittest/__pycache__/test_allreduce_cuda.cpython-38.pyc', {'__name__': 'builtins', '__doc__': "Built-in functions, exceptions, and other objects.\n\nNoteworthy: None is the `nil' object`
             for k, v in extra_vars.items():
                 self.var_table.add(k, v)
             node = self.diag.source.as_ast()
+            __import__('pdb').set_trace()
             self.visit(node)
 
     def get_dispatch_token(self, node: doc.FunctionDef) -> str:
+        __import__('pdb').set_trace()
         if not isinstance(node, doc.FunctionDef):
             self.report_error(node, "Only can get dispatch token for function.")
         if not node.decorator_list:
             self.report_error(node, "Function must be decorated")
         # TODO: only the last decorator is parsed
+        ## pdb(6clc): 装饰器识别decorator
         decorator = self.eval_expr(node.decorator_list[-1])
         if not hasattr(decorator, "dispatch_token"):
             self.report_error(node, "The parser does not understand the decorator")
@@ -539,11 +549,23 @@ class Parser(doc.NodeVisitor):
         """
         if isinstance(node, (list, tuple)):
             for item in node:
+                # visit_FunctionDef 入口
+                __import__('pdb').set_trace()
                 self.visit(item)
             return
         if not isinstance(node, doc.AST):
             return
+#         (Pdb) p node.__class__.__name__
+# 'Module'
+# (Pdb) p node.__class__
+# <class 'tvm.script.parser.core.doc_core.Module'>
         name = node.__class__.__name__.split(".")[-1]
+#         (Pdb) p DEFAULT_VISIT
+# {'Pass', 'Module', 'Interactive', 'Expression'}
+
+# (Pdb) p name 遍历到function def
+# 'FunctionDef'
+
         if name in DEFAULT_VISIT:
             func = self.generic_visit
         else:
@@ -551,6 +573,7 @@ class Parser(doc.NodeVisitor):
         if func is None:
             raise NotImplementedError(f"Visitor of AST node is not implemented: {name}")
         try:
+            # -->
             func(node)
         except DiagnosticError:
             raise
@@ -599,7 +622,14 @@ class Parser(doc.NodeVisitor):
         """
         token = self.get_dispatch_token(node)
         current_token = self.dispatch_tokens[-1]
+#         (Pdb) p token
+# 'tir'
+# (Pdb) p current_token
+# 'default'
         func = dispatch.get(token=token, type_name="FunctionDef", default=None)
+#         (Pdb) p func
+# <function visit_function_def at 0x7f9904cb99d0>
+
         if func is None:
             self.report_error(node, "The parser does not understand the decorator")
         pre_func = dispatch.get(
@@ -609,6 +639,7 @@ class Parser(doc.NodeVisitor):
             token=current_token, type_name="post_token_switch", default=_do_nothing
         )
         pre_func(self, node)
+        # _dispatch_wrapper 理解为一个类型转换代码
         _dispatch_wrapper(func)(self, node)
         post_func(self, node)
 

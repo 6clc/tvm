@@ -79,6 +79,7 @@ class Source:
             # and `getsource` will throw a TypeError
             mod = inspect.getmodule(program)
             if mod:
+                # pdb() 获得的是program所在文件的所有内容
                 self.full_source = inspect.getsource(mod)
             else:
                 self.full_source = self.source

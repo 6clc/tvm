@@ -363,6 +363,7 @@ def visit_with(self: Parser, node: doc.With) -> None:
         self.visit_body(node.body)
 
 
+## 在dispatch中注册tir的parse方法
 @dispatch.register(token="tir", type_name="FunctionDef")
 def visit_function_def(self: Parser, node: doc.FunctionDef) -> None:
     """The function definition visiting method for tir.
@@ -382,12 +383,15 @@ def visit_function_def(self: Parser, node: doc.FunctionDef) -> None:
     with self.var_table.with_frame():
         self.var_table.add("range", T.serial)
         with T.prim_func(is_private=privacy):
+            # 1. function name
             T.func_name(node.name)
+            # 2. return type
             if node.returns is not None:
                 ret_type = self.eval_expr(node.returns)
                 if callable(ret_type):
                     ret_type = PrimType(ret_type().dtype)
                 T.func_ret(ret_type)
+            # 3. func args
             with self.with_dispatch_token("tir"):
                 # TODO: handle different types of arguments:
                 # - vararg: arg | None
@@ -409,6 +413,7 @@ def visit_function_def(self: Parser, node: doc.FunctionDef) -> None:
                             raise
                     param = T.arg(arg.arg, ann)
                     self.var_table.add(arg.arg, param)
+                # 4 body
                 self.visit_body(node.body)
     self.function_annotations = supplied_annotation
 

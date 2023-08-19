@@ -248,6 +248,8 @@ def build(
     else:
         target_input_mod = inputs
 
+    print("6clc input mode after lower", input_mod)
+
     # Because modules can be created from a variety of sources, we annotate them
     # with the relevant attributes here to ensure they propagate
     annotated_mods = {}
@@ -306,6 +308,7 @@ def build(
     if not isinstance(target_host, Target):
         target_host = Target(target_host)
 
+    # c runtime
     if str(runtime) == "crt" and runtime["system-lib"]:
         # 6clc: SKIP
         if target_host.kind.name == "c":
