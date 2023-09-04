@@ -94,6 +94,7 @@ def get_pipeline(name: str = "zero", **kwargs) -> tvm.transform.Pass:
     """
 
     if name in PIPELINE_MAP:
+        # pdb:    name str = 'zero'
         return PIPELINE_MAP[name](**kwargs)
     else:
         raise ValueError(

@@ -554,6 +554,7 @@ class Parser(doc.NodeVisitor):
         if not isinstance(node, doc.AST):
             return
         name = node.__class__.__name__.split(".")[-1]
+        print(name, "6clc")
         if name in DEFAULT_VISIT:
             func = self.generic_visit
         else:

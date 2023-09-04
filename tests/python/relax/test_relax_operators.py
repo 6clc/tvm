@@ -37,7 +37,7 @@ class InputModule:
 
 def run_cpu(mod, func_name, *input):
     target = tvm.target.Target("llvm")
-    ex = relax.build(mod, target)
+    ex = relax.build(mod, target) # ex is excutable
     vm = relax.VirtualMachine(ex, tvm.cpu())
     return vm[func_name](*input)
 

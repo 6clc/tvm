@@ -407,7 +407,7 @@ def test_fuse_fail_not_only_child():
         sch.fuse(j, k)
 
 
-def test_fuse_split_fail_with_annotation():
+def test_fuse_split_fail_with_annotation(): # not do
     sch = tir.Schedule(elementwise_with_anno, debug_mask="all")
     block_b = sch.get_block("B")
     _, j, k = sch.get_loops(block_b)
@@ -417,7 +417,7 @@ def test_fuse_split_fail_with_annotation():
         sch.split(k, factors=[None, 10])
 
 
-def test_fuse_split_fail_not_start_with_zero():
+def test_fuse_split_fail_not_start_with_zero(): # not do
     sch = tir.Schedule(elementwise_with_anno, debug_mask="all")
     block_b = sch.get_block("B")
     _, j, k = sch.get_loops(block_b)
@@ -427,7 +427,7 @@ def test_fuse_split_fail_not_start_with_zero():
         sch.split(k, factors=[None, 10])
 
 
-def test_fuse_with_opaque_block():
+def test_fuse_with_opaque_block(): #not do
     sch = tir.Schedule(elementwise_with_opaque_block, debug_mask="all")
     block_opaque = sch.get_block("opaque")
     i, j, k = sch.get_loops(block_opaque)
@@ -450,7 +450,7 @@ def test_fuse_with_opaque_access():
     verify_trace_roundtrip(sch=sch, mod=opaque_access)
 
 
-def test_split_with_opaque_block():
+def test_split_with_opaque_block(): # not do
     sch = tir.Schedule(elementwise_with_opaque_block, debug_mask="all")
     block_opaque = sch.get_block("opaque")
     i, _, _ = sch.get_loops(block_opaque)
@@ -473,7 +473,7 @@ def test_split_with_opaque_access():
     verify_trace_roundtrip(sch=sch, mod=opaque_access)
 
 
-def test_split_with_non_positive_factors():
+def test_split_with_non_positive_factors(): # not do
     sch = tir.Schedule(elementwise, debug_mask="all")
     block_b = sch.get_block("B")
     i, j, k = sch.get_loops(block_b)
@@ -485,8 +485,8 @@ def test_split_with_non_positive_factors():
         sch.split(k, factors=[None, -16])
 
 
-def test_fuse_split_fail_with_thread_binding():
-    sch = tir.Schedule(elementwise_with_thread_binding, debug_mask="all")
+def test_fuse_split_fail_with_thread_binding(): # not do
+    sch = tir.Schedule(elementwise_with_thread_binding, debug_mask="all") 
     block_b = sch.get_block("B")
     _, j, k = sch.get_loops(block_b)
     with pytest.raises(tvm.tir.ScheduleError):
@@ -495,7 +495,7 @@ def test_fuse_split_fail_with_thread_binding():
         sch.split(k, factors=[None, 10])
 
 
-def test_fuse_symbolic():
+def test_fuse_symbolic(): # not do  unspport
     sch = tir.Schedule(elementwise_symbolic, debug_mask="all")
     block_b = sch.get_block("B")
     i, j, k = sch.get_loops(block_b)
@@ -504,7 +504,7 @@ def test_fuse_symbolic():
     verify_trace_roundtrip(sch=sch, mod=elementwise_symbolic)
 
 
-def test_split_symbolic():
+def test_split_symbolic(): # not do unspport
     sch = tir.Schedule(elementwise_symbolic, debug_mask="all")
     block_b = sch.get_block("B")
     _, _, k = sch.get_loops(block_b)
@@ -513,7 +513,7 @@ def test_split_symbolic():
     verify_trace_roundtrip(sch=sch, mod=elementwise_symbolic)
 
 
-def test_fuse_fail_with_dependent_loops():
+def test_fuse_fail_with_dependent_loops(): # not do
     sch = tir.Schedule(elementwise_dependent_loops, debug_mask="all")
     block_b = sch.get_block("B")
     i, j, _ = sch.get_loops(block_b)
@@ -530,7 +530,7 @@ def test_fuse_not_affine():
     verify_trace_roundtrip(sch=sch, mod=elementwise_not_affine)
 
 
-def test_add_unit_loop_above_block():
+def test_add_unit_loop_above_block(): # not do
     @T.prim_func
     def zero_dim(
         A: T.Buffer((), "int32"),
@@ -558,7 +558,7 @@ def test_add_unit_loop_above_block():
     assert_structural_equal_ignore_global_symbol(zero_dim_added, sch.mod["main"])
 
 
-def test_add_unit_loop_above_loop():
+def test_add_unit_loop_above_loop(): # not do
     @T.prim_func
     def zero_dim(
         A: T.Buffer((), "int32"),

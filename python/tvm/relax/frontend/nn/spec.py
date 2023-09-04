@@ -270,8 +270,8 @@ class SpecBuilder:
 
         # pylint: enable=protected-access
 
-        params = _params()
-        effects = _effects()
+        params = _params() # type is list, type of item is tuple(name Tensor)
+        effects = _effects() # type is list, type of item is tupe(name, nn.Modules*), nn.Module.IOEffect, nn.Module.KVCaceh
         with self:
             with self.builder.function("_initialize_effect"):
                 with self.builder.dataflow():

@@ -384,14 +384,17 @@ class Module(SubroutineMixin):
         # Convert nn.Module to IRModule
         spec = _spec.ModuleSpec.from_raw(spec, self)
         mod, params = _spec.SpecBuilder().build(spec)
+        # 这个mod是primfunc和relaxmodel的混合体
 
         # Convert parameters
         device = _str_to_device(device)
         params = _param_to_ndarray(params, device)
 
         # Compile mod and feed it to VM
-        mod = relax.pipeline.get_pipeline(pipeline)(mod)  # pylint: disable=no-value-for-parameter
-        mod = relax.build(mod, target=target)
+        # 一系列的pass
+        mod = relax.pipeline.get_pipeline(pipeline)(mod)  # pylint: disable=no-value-for-parameter # 还是prifm func和relax model的混合
+        # 仍然有一些 pass
+        mod = relax.build(mod, target=target) #编译成了executable
         vm = VirtualMachine(mod, device)  # pylint: disable=invalid-name
 
         if out_format == "torch":

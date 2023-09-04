@@ -226,7 +226,9 @@ def visit_assign(self: Parser, node: doc.Assign) -> None:
     if len(node.targets) != 1:
         self.report_error(node, "Consequential assignments like 'a = b = c' are not supported.")
     lhs = node.targets[0]
+    print("6clc ", node.value)
 
+    # RHS is doc.Subscript, should parse it's Iter Var Range
     if isinstance(node.value, doc.Subscript):
         check_slices = []
         if isinstance(node.value.slice, doc.Slice):
@@ -248,13 +250,15 @@ def visit_assign(self: Parser, node: doc.Assign) -> None:
                     s.upper.end_col_offset + 2,
                 )
 
-    rhs = self.eval_expr(node.value)
+    rhs = self.eval_expr(node.value) # when node.value is remap, is a ast.Call Node
     if isinstance(lhs, doc.Subscript):
         if isinstance(lhs.slice, doc.Tuple):
             indices = []
             for index in lhs.slice.elts:
+                # slice有多少种情况？
                 indices.append(self.eval_expr(index))
         else:
+            # slice有多少种情况？
             indices = self.eval_expr(lhs.slice)
         T.buffer_store(self.eval_expr(lhs.value), rhs, indices)
     else:
@@ -396,6 +400,7 @@ def visit_function_def(self: Parser, node: doc.FunctionDef) -> None:
                 # - kwarg: arg | None
                 # - defaults: list[expr]
                 # - posonlyargs: list[arg]
+                # 1. 处理 args 的参数
                 for arg in node.args.args:
                     if arg.annotation is None:
                         self.report_error(arg, "Type annotation required for function parameters.")
@@ -409,6 +414,7 @@ def visit_function_def(self: Parser, node: doc.FunctionDef) -> None:
                             raise
                     param = T.arg(arg.arg, ann)
                     self.var_table.add(arg.arg, param)
+                # 2. 处理body
                 self.visit_body(node.body)
     self.function_annotations = supplied_annotation
 
@@ -433,6 +439,7 @@ def visit_tvm_annotation(self: Parser, node: doc.expr):
 
 @dispatch.register(token="tir", type_name="Expr")
 def visit_expr_stmt(self: Parser, node: doc.Expr) -> None:
+    # call, constant`k` ?
     """The expr statement visiting method for tir.
 
     Parameters

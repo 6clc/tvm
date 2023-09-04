@@ -87,6 +87,7 @@ void BlockFrameNode::ExitWithScope() {
   tvm::tir::Block block(iter_vars, reads.value_or(Array<tvm::tir::BufferRegion>()),
                         writes.value_or(Array<tvm::tir::BufferRegion>()), name, AsStmt(stmts), init,
                         tir_alloc_buffers, match_buffers, attrs);
+  VLOG(2) << "use realize block ";
   if (no_realize) {
     CHECK(iter_values.empty())
         << "ValueError: Block bindings are not allowed when `no_realize=True`";

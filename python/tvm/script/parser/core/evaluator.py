@@ -162,7 +162,7 @@ class ExprEvaluator:
         if (
             isinstance(node, doc.Call)
             and hasattr(node.func, "attr")
-            and node.func.attr not in ["reads", "writes", "match_buffer", "realize"]
+            and node.func.attr not in ["reads", "writes", "match_buffer", "realize"] # is remap axis
         ) or isinstance(node, (doc.BinOp, doc.UnaryOp, doc.Compare, doc.BoolOp)):
             if isinstance(node, doc.BinOp):
                 args = [node.left, node.right]
@@ -217,6 +217,7 @@ class ExprEvaluator:
             ),
         ):
             return node
+        # doc的ast很多都继承doc.expr
         if not isinstance(node, (doc.expr, doc.slice)):
             return node
         if isinstance(node, doc.Lambda):

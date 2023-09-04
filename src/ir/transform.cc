@@ -487,6 +487,7 @@ IRModule SequentialNode::operator()(IRModule mod, const PassContext& pass_ctx) c
     } else {
       mod = pass(std::move(mod), pass_ctx);
     }
+    VLOG(2) << mod;
   }
   return mod;
 }

@@ -333,7 +333,9 @@ def build(
 
     # builder collects the executable
     builder = relax.ExecBuilder()
+    # CodeGen
     leftover_mod = _vmcodegen(builder, new_mod, exec_mode=exec_mode)
+    # Tir Mod
     tir_mod = _filter_tir(leftover_mod)
     return _vmlink(builder, target, tir_mod, ext_libs, params, system_lib=system_lib)
 

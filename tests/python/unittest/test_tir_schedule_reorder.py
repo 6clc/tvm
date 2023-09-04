@@ -204,7 +204,6 @@ def test_reorder2():
     assert_structural_equal_ignore_global_symbol(elementwise_reordered2, sch.mod["main"])
     verify_trace_roundtrip(sch=sch, mod=elementwise)
 
-
 def test_reorder_with_opaque_access():
     sch = tir.Schedule(opaque_access, debug_mask="all")
     block_a = sch.get_block("A")

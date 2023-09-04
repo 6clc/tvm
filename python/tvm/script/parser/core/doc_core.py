@@ -317,6 +317,7 @@ class Expr(stmt):
 
     def __init__(self, value, lineno, col_offset, end_lineno, end_col_offset):
         super().__init__(lineno, col_offset, end_lineno, end_col_offset)
+        print("6clc Expr", value)
         self.value = value
 
 
