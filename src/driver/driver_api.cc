@@ -347,6 +347,7 @@ TVM_REGISTER_GLOBAL("driver.lower_module").set_body_typed([](IRModule mod, bool 
 });
 
 IRModule LowerPrimFunc(tir::PrimFunc func, const std::string& name, bool simple_mode) {
+  // DLOG(WARNING) << "6clc " << "LowerPrimFunc";
   transform::PassContext pass_ctx = transform::PassContext::Current();
   tir::PrimFunc f = WithAttr(std::move(func), "global_symbol", runtime::String(name));
 
@@ -381,6 +382,7 @@ IRModule LowerSchedule(te::Schedule sch, const Array<ObjectRef>& args, const std
                        const std::unordered_map<te::Tensor, tir::Buffer>& binds,
                        GlobalVarSupply global_var_supply, bool simple_mode) {
   IRModule mod = ScheduleToModule(std::move(sch), args, name, binds, global_var_supply);
+  // LOG(WARNING) << mod;
   // Get the legacy TE pass list
   Array<transform::Pass> pass_list = CreatePassList(simple_mode);
   return LowerWithPassList(mod, pass_list);
@@ -412,11 +414,14 @@ std::pair<IRModule, IRModule> SplitMixedModule(IRModule mod_mixed, const Target&
 
   ICHECK(mod_mixed.defined()) << "This module must be defined";
 
+  LOG(WARNING) << mod_mixed;
   mod_mixed = ApplyPasses(mod_mixed, MixedModulePassManager(mod_mixed, target));
+  LOG(WARNING) << mod_mixed;
 
   IRModule host_mod = ApplyPasses(mod_mixed, HostModulePassManager(mod_mixed, target_host));
 
   IRModule device_mod = ApplyPasses(mod_mixed, DeviceModulePassManager(mod_mixed, target));
+  LOG(WARNING) << device_mod;
 
   auto keys = target->GetKeys();
 
@@ -492,6 +497,9 @@ runtime::Module TIRToRuntime(const Map<Target, IRModule>& inputs_arg,
       ICHECK(host_mod.defined()) << "The split host module must be defined";
 
       ICHECK(mhost_all.defined()) << "The host module must be defined";
+
+      LOG(WARNING) << host_mod;
+      LOG(WARNING) << device_mod;
 
       // We don't want library modules going back into host codegen
       // unless they're supposed to. Here if we overrode the target host

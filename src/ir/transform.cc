@@ -263,6 +263,7 @@ IRModule Pass::operator()(IRModule mod, const PassContext& pass_ctx) const {
   const PassNode* node = operator->();
   ICHECK(node != nullptr);
   const PassInfo& pass_info = node->Info();
+  LOG(WARNING) << "6clc apply pass: " << pass_info->name;
   if (!pass_ctx.InstrumentBeforePass(mod, pass_info)) {
     DLOG(INFO) << "Skipping pass : " << pass_info->name
                << " with opt level: " << pass_info->opt_level;
@@ -274,6 +275,8 @@ IRModule Pass::operator()(IRModule mod, const PassContext& pass_ctx) const {
   } else {
     ret = node->operator()(std::move(mod), pass_ctx);
   }
+  // LOG(WARNING) << pass_info->name;
+  // LOG(WARNING) << ret;
   pass_ctx.InstrumentAfterPass(ret, pass_info);
   return std::move(ret);
 }

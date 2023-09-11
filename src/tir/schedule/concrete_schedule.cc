@@ -550,6 +550,8 @@ void ConcreteScheduleNode::Vectorize(const LoopRV& loop_rv) {
 }
 
 void ConcreteScheduleNode::Bind(const LoopRV& loop_rv, const String& thread_axis) {
+  // LOG(WARNING) << "dddd bind";
+  // VLOG(2) << "dddxx";
   if (thread_axis == "vthread") {
     LOG(WARNING) << "`vthread` is legacy behavior and is going to be deprecated. Please use "
                     "`vthread.x`, `vthread.y` and `vthread.z` instead";

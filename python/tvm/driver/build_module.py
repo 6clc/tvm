@@ -129,6 +129,7 @@ def lower(
     if isinstance(inp, IRModule):
         return ffi.lower_module(inp, simple_mode)
     if isinstance(inp, PrimFunc):
+        print("6clc 132 PrimFunc")
         return ffi.lower_primfunc(inp, name, simple_mode)
     if isinstance(inp, te.Schedule):
         return ffi.lower_schedule(inp, args, name, binds, simple_mode)
@@ -248,6 +249,7 @@ def build(
     else:
         target_input_mod = inputs
 
+    print(input_mod, "xxx yy zz")
     # Because modules can be created from a variety of sources, we annotate them
     # with the relevant attributes here to ensure they propagate
     annotated_mods = {}

@@ -899,7 +899,10 @@ namespace transform {
 
 Pass LowerCrossThreadReduction() {
   auto pass_func = [=](PrimFunc f, IRModule m, PassContext ctx) {
-    return LowerCrossThreadReduction(std::move(f));
+    // LOG(WARNING) << "6clc" << f;
+    auto tmp  = LowerCrossThreadReduction(std::move(f));
+    // LOG(WARNING) << tmp;
+    return tmp;
   };
   return CreatePrimFuncPass(pass_func, 0, "tir.LowerCrossThreadReduction", {});
 }

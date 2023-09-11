@@ -244,7 +244,7 @@ def test_topi():
 
     W = te.placeholder((5, 5), name="W")
     exps = topi.exp(topi.nn.dense(X, W))
-    sumexps = topi.sum(exps, axis=-1, keepdims=True)
+    sumexps = topi.sum(exps, axis=0, keepdims=True)
     R = exps / sumexps
     check_grad(R, [X, W], data_range=(-1, 1))
 
