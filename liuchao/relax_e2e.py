@@ -12,6 +12,7 @@ from tvm.script import relax as R
 from tvm.script import tir as T
 from tvm.relax.frontend import detach_params
 from tvm.relax.frontend.torch import from_fx
+from tvm import dlight as dl
 
 
 def verify_model(torch_model, input_info, binding, expected):
@@ -30,8 +31,9 @@ def verify_model(torch_model, input_info, binding, expected):
         expected = tvm.relax.transform.AnnotateTIROpPattern()(expected)
         expected = tvm.relax.transform.FuseOps()(expected)
         expected = tvm.relax.transform.FuseTIR()(expected)
-        expected = tvm.tir.transform.LowerCrossThreadReduction()(expected)
-        expected = tvm.tir.transform.DefaultGPUSchedule()(expected)
+        expected = dl.ApplyDefaultSchedule(dl.gpu.Reduction())(expected) # 只针对reduce才有用
+        # expected = tvm.tir.transform.DefaultGPUSchedule()(expected)
+        # expected = tvm.tir.transform.LowerCrossThreadReduction()(expected)
     print(expected)
     ex = relax.build(expected, target)
 def test_linear():
@@ -46,12 +48,12 @@ def test_linear():
             add_result =  input * 2.
 
             # 对结果进行求和
-            sum_result = torch.sum(add_result, 3)
+            sum_result = torch.sum(add_result, 2)
             # sum_result = add_result + input
             return sum_result
 
 
-    input_info = [([2, 3, 10, 10], "float32")]
+    input_info = [([2, 3, 10, 1024], "float32")]
 
     model = Dense1()
     # binding = {"w1": model.linear.weight.detach().numpy(), "w2": model.linear.bias.detach().numpy()}
