@@ -30,11 +30,12 @@ def verify_model(torch_model, input_info, binding, expected):
         expected = tvm.relax.transform.LegalizeOps()(expected) # 有init block
         expected = tvm.relax.transform.AnnotateTIROpPattern()(expected)
         expected = tvm.relax.transform.FuseOps()(expected)
+        print(expected)
         expected = tvm.relax.transform.FuseTIR()(expected)
+        print(expected)
         expected = dl.ApplyDefaultSchedule(dl.gpu.Reduction())(expected) # 只针对reduce才有用
-        # expected = tvm.tir.transform.DefaultGPUSchedule()(expected)
+        expected = tvm.tir.transform.DefaultGPUSchedule()(expected)
         # expected = tvm.tir.transform.LowerCrossThreadReduction()(expected)
-    print(expected)
     ex = relax.build(expected, target)
 def test_linear():
     # nn.Linear
@@ -45,10 +46,13 @@ def test_linear():
 
         def forward(self, input):
             # 执行加法操作
+            y = torch.ones([2, 3, 10, 1024])
             add_result =  input * 2.
 
             # 对结果进行求和
-            sum_result = torch.sum(add_result, 2)
+            sum_result = torch.sum(add_result, 3)
+            x = torch.ones([2, 3, 10])
+            sum_result += x
             # sum_result = add_result + input
             return sum_result
 

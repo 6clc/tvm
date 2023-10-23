@@ -47,6 +47,7 @@ using namespace tvm::te;
         x->shape, [&](const Array<Var>& i) { return ::tvm::OpName(x(i)); }, name, tag); \
   }
 
+
 TOPI_DECLARE_UNARY_OP(exp);
 TOPI_DECLARE_UNARY_OP(erf);
 TOPI_DECLARE_UNARY_OP(sigmoid);

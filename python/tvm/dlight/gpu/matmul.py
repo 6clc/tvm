@@ -346,15 +346,16 @@ class MatmulTensorization(ScheduleRule):
         sch.transform_block_layout(main_block, matmul_index_map)
 
         # Step 2. Padding for dynamic shape kernels
-        sch.pad_einsum(
-            main_block,
-            [
-                1,
-                micro_size_x * x_pad_factor,
-                micro_size_y * y_pad_factor,
-                micro_size_k * k_pad_factor,
-            ],
-        )
+        # sch.pad_einsum(
+        #     main_block,
+        #     [
+        #         1,
+        #         micro_size_x * x_pad_factor,
+        #         micro_size_y * y_pad_factor,
+        #         micro_size_k * k_pad_factor,
+        #     ],
+        # )
+        print("after pad einsum 358: ", sch.mod["main"])
 
         # Step 3. Schedule matmul to use tensor core
         block = main_block
@@ -515,6 +516,7 @@ class Matmul(ScheduleRule):
         index_maps = get_index_map(block_stmt)
         if index_maps is None:
             return None
+        #(question): 怎么确保这里len(index_maps) = 4
         matmul_index_map, a_index_map, b_index_map, c_index_map = index_maps
 
         # Start Schedule
@@ -535,13 +537,20 @@ class Matmul(ScheduleRule):
         minimal_tensorize_threshold = 64
 
         # Step 1. Normalize generic matmul to C[S, I, J] += A[S, I, K] * B[S, J, K]
+        print("539: begin", sch.mod["main"])
         block = sch.reindex(main_block, ("read", 0))
+        print(sch.mod["main"])
         sch.transform_layout(block, ("write", 0), a_index_map)
+        print(sch.mod["main"])
         block = sch.reindex(main_block, ("read", 1))
         sch.transform_layout(block, ("write", 0), b_index_map)
         block = sch.reindex(main_block, ("write", 0))
         sch.transform_layout(block, ("read", 0), c_index_map)
+        print("548: begin", sch.mod["main"])
+        print("549: IndexMap ", matmul_index_map)
         sch.transform_block_layout(main_block, matmul_index_map)
+        print("529: end", sch.mod["main"])
+
 
         block_stmt = sch.get(main_block)
         if target.kind.name == "cuda" and check_sm_version(target.arch) >= 70:
@@ -558,15 +567,16 @@ class Matmul(ScheduleRule):
                     return tensorize_sch
 
         # Step 2. Padding for dynamic shape kernels
-        sch.pad_einsum(
-            main_block,
-            [
-                1,
-                vthread_x * block_size_x * micro_size_x,
-                vthread_y * block_size_y * micro_size_y,
-                micro_size_k,
-            ],
-        )
+        # sch.pad_einsum(
+        #     main_block,
+        #     [
+        #         1,
+        #         vthread_x * block_size_x * micro_size_x,
+        #         vthread_y * block_size_y * micro_size_y,
+        #         micro_size_k,
+        #     ],
+        # )
+        print("after pad_einsum 579: ", sch.mod["main"])
 
         # Step 3. Schedule matmul
         batch, x, y, k = sch.get_loops(main_block)
@@ -608,9 +618,12 @@ class Matmul(ScheduleRule):
         a_g2s = _cooperative_fetch(0, vec_len=vector_size)
         b_g2s = _cooperative_fetch(1, vec_len=vector_size)
 
+
+        print("618: begin ", sch.mod["main"])
         auto_inline_producers(sch, a_g2s)
         auto_inline_producers(sch, b_g2s)
         auto_inline_consumers(sch, l2g)
+        print("618: end ", sch.mod["main"])
 
         remaining_consumers = sch.get_consumers(l2g)
 

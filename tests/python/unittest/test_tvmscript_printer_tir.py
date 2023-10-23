@@ -456,6 +456,7 @@ with T.realize(A[0:128, 0:128], "test_storage_scope"):
 
 def test_var():
     a = tir.Var("a", "float32")
+    print(a.script(verbose_expr=True))
     _assert_print(
         a,
         """
@@ -707,6 +708,12 @@ T.Range(0, 10)
 
 
 def test_prim_type():
+    import os
+    import sys
+    print(sys.version)
+    print(os.getpid())
+    os.system("read REPLY")
+
     obj = ir.PrimType("float32")
     _assert_print(obj, "T.float32")
 
@@ -842,4 +849,7 @@ def func(A: T.Buffer((128, 128), "float32"), B: T.Buffer((256, 256), "float32"))
 
 
 if __name__ == "__main__":
-    tvm.testing.main()
+    test_prim_type()
+    test_var()
+    # tvm.testing.main()
+

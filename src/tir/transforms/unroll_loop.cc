@@ -278,12 +278,12 @@ namespace transform {
 
 Pass UnrollLoop() {
   auto pass_func = [=](PrimFunc f, IRModule m, PassContext ctx) {
-    auto* n = f.CopyOnWrite();
-    auto cfg = ctx->GetConfig<UnrollLoopConfig>("tir.UnrollLoop");
-    if (!cfg.defined()) {
-      cfg = AttrsWithDefaultValues<UnrollLoopConfig>();
-    }
-    n->body = UnrollLoop(std::move(f->body), cfg.value());
+    // auto* n = f.CopyOnWrite();
+    // auto cfg = ctx->GetConfig<UnrollLoopConfig>("tir.UnrollLoop");
+    // if (!cfg.defined()) {
+    //   cfg = AttrsWithDefaultValues<UnrollLoopConfig>();
+    // }
+    // n->body = UnrollLoop(std::move(f->body), cfg.value());
     return f;
   };
   return CreatePrimFuncPass(pass_func, 0, "tir.UnrollLoop", {});

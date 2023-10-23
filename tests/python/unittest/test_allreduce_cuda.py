@@ -24,14 +24,14 @@ from tvm.script import tir as T
 @T.prim_func
 def reduce(a: T.handle, b: T.handle, d1: T.int32, d2: T.int32, d3: T.int32) -> None:
     A = T.match_buffer(a, [1, d1, d2, d3])
-    B = T.match_buffer(b, [1, d2, d3])
+    B = T.match_buffer(b, [1, d1, d2])
 
     for i, j, k, l in T.grid(1, d1, d2, d3):
         with T.block("reduce"):
-            vi, vj, vk, vl = T.axis.remap("SRSS", [i, j, k, l])
+            vi, vj, vk, vl = T.axis.remap("SSSR", [i, j, k, l])
             with T.init():
-                B[vi, vk, vl] = 0.0
-            B[vi, vk, vl] = B[vi, vk, vl] + A[vi, vj, vk, vl]
+                B[vi, vj, vk] = 0.0
+            B[vi, vj, vk] = B[vi, vj, vk] + A[vi, vj, vk, vl]
 
 
 @T.prim_func
@@ -53,6 +53,7 @@ def test_allreduce_cuda():
     def check_sum(d1: int, d2: int, d3: int):
         _, _, _d1, _d2, _d3 = reduce.params
         mod = reduce.specialize({_d1: d1, _d2: d2, _d3: d3})
+        # print(mod)
         sch = tvm.tir.Schedule(mod)
         blk = sch.get_block("reduce")
         i, j, k, l = sch.get_loops(blk)
@@ -100,6 +101,7 @@ def test_allreduce_cuda():
             for d3 in [1024]:
                 # if d1 * d2 * d3 > 1024:
                 #     continue
+                d1, d2, d3 = 4, 8, 64
                 check_sum(d1, d2, d3)
                 # check_max(d1, d2, d3)
 
@@ -110,5 +112,5 @@ if __name__ == "__main__":
     print(sys.version)
     print(os.getpid())
     # or
-    os.system("read REPLY")
+    # os.system("read REPLY")
     test_allreduce_cuda()

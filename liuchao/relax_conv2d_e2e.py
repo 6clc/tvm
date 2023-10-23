@@ -27,7 +27,7 @@ def verify_model(torch_model, input_info, binding, expected):
     print(expected)
 
     # target = tvm.target.Target("cuda", host="llvm")
-    target = tvm.target.Target("nvidia/geforce-gtx-1080-ti")
+    target = tvm.target.Target("cuda")
     # with target, tvm.transform.PassContext(opt_level=3):
     with target:
         expected = tvm.relax.transform.LegalizeOps()(expected) # 有init block
@@ -53,9 +53,9 @@ def test_linear():
             return x
 
 
-    in_channels = 1 
-    out_channels = 2
-    input_info = [([1, 1, 3, 3], "float32")]
+    in_channels = 3
+    out_channels = 128
+    input_info = [([1, 3, 8, 8], "float32")]
 
     model = Dense1(in_channels, out_channels )
     verify_model(model, input_info, None, None)

@@ -382,9 +382,11 @@ void PadEinsum(ScheduleState self, const StmtSRef& block_sref, const Array<Integ
   // Step 3. Figure out the padding needed
   PadEinsumBufferReplacer replacer;
   for (int i = 0, n = padding.size(); i < n; ++i) {
+    LOG(WARNING)<< "xx " << padding[i];
     const IterVar& iter = block->iter_vars[i];
     PrimExpr dom = iter->dom->extent;
     PrimExpr new_dom = analyzer.Simplify(ceildiv(dom, padding[i]) * padding[i]);
+    LOG(WARNING)<< "yy " << dom << "  " << new_dom;
     if (!analyzer.CanProveEqual(new_dom, dom)) {
       replacer.iter2padded_extents.Set(iter->var, new_dom);
       if (const auto* loop_var = realize->iter_values[i].as<VarNode>()) {

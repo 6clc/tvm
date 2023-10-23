@@ -352,6 +352,6 @@ def test_rms_norm():
 
 if __name__ == "__main__":
     test_softmax_1()
-    test_softmax_2()
-    test_layer_norm()
-    test_rms_norm()
+    # test_softmax_2()
+    # test_layer_norm()
+    # test_rms_norm()

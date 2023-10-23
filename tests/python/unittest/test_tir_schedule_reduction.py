@@ -281,6 +281,7 @@ def test_reduction_decompose_with_different_for_kind():
     B = s.get_block("B")
     k, _ = s.get_loops(B)
     B_init = s.decompose_reduction(B, k)
+    print(s.mod["main"])
     assert_structural_equal_ignore_global_symbol(s.mod["main"], colsum_decompose_with_vectorization)
     assert s.get(B).same_as(s.get(s.get_block("B_update")))
     assert s.get(B_init).same_as(s.get(s.get_block("B_init")))

@@ -526,6 +526,7 @@ runtime::Module TIRToRuntime(const Map<Target, IRModule>& inputs_arg,
       mhost.Import(it);
     }
   }
+  LOG(WARNING) << mhost->GetSource();
 
   return mhost;
 }
